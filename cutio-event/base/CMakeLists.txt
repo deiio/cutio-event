@@ -5,6 +5,7 @@
 #
 
 set(base_SRCS
+    thread.cc
     utc_time.cc
 )
 

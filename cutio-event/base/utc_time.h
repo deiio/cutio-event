@@ -13,7 +13,7 @@ namespace cutio {
 namespace event {
 
 /**
- * Time stamp in UTC.
+ * Time stamp in UTC, in microseconds resolution.
  *
  * This class is immutable.
  * It's recommended to pass it by value, since it's passed in register
@@ -21,7 +21,7 @@ namespace event {
  */
 class UtcTime {
  public:
-  // Constructs an invalid UtcTime.
+  // Constructs an Invalid UtcTime.
   UtcTime();
 
   // Constructs a UtcTime at specific time.
@@ -29,30 +29,32 @@ class UtcTime {
 
   // Default copy/assignment are okay.
 
-  string toString() const;
+  string ToString() const;
 
-  bool valid() const {
+  bool Valid() const {
     return microSecondsSinceEpoch_ > 0;
   }
 
-  bool before(UtcTime rhs) const {
+  bool Before(UtcTime rhs) const {
     return microSecondsSinceEpoch_ < rhs.microSecondsSinceEpoch_;
   }
 
-  bool after(UtcTime rhs) const {
+  bool After(UtcTime rhs) const {
     return microSecondsSinceEpoch_ > rhs.microSecondsSinceEpoch_;
   }
 
-  bool equals(UtcTime rhs) const {
+  bool Equals(UtcTime rhs) const {
     return microSecondsSinceEpoch_ == rhs.microSecondsSinceEpoch_;
   }
 
   // for internal usage.
-  int64_t microSecondsSinceEpoch() const {
+  int64_t MicroSecondsSinceEpoch() const {
     return microSecondsSinceEpoch_;
   }
 
-  static UtcTime now();
+  // Get time of Now.
+  static UtcTime Now();
+  static UtcTime Invalid();
   static const int kMicroSecondsPerSecond = 1000 * 1000;
 
  private:
@@ -60,11 +62,11 @@ class UtcTime {
 };
 
 inline bool operator<(UtcTime lhs, UtcTime rhs) {
-  return lhs.before(rhs);
+  return lhs.Before(rhs);
 }
 
 inline bool operator==(UtcTime lhs, UtcTime rhs) {
-  return lhs.equals(rhs);
+  return lhs.Equals(rhs);
 }
 
 /**
@@ -73,9 +75,20 @@ inline bool operator==(UtcTime lhs, UtcTime rhs) {
  * @param high, low
  * @return (high - low) in seconds
  */
-inline double timeDifference(UtcTime high, UtcTime low) {
-  auto diff = high.microSecondsSinceEpoch() - low.microSecondsSinceEpoch();
+inline double TimeDifference(UtcTime high, UtcTime low) {
+  auto diff = high.MicroSecondsSinceEpoch() - low.MicroSecondsSinceEpoch();
   return static_cast<double>(diff) / UtcTime::kMicroSecondsPerSecond;
+}
+
+/**
+ * Add @c seconds to given timestamp.
+ *
+ * @param timestamp, seconds
+ * @return timestamp + seconds at UtcTime
+ */
+inline UtcTime AddTime(UtcTime timestamp, double seconds) {
+  auto delta = static_cast<int64_t>(seconds * UtcTime::kMicroSecondsPerSecond);
+  return UtcTime(timestamp.MicroSecondsSinceEpoch() + delta);
 }
 
 }  // namespace event

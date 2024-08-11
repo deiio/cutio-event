@@ -8,17 +8,19 @@
 
 #include <stdio.h>
 
-void passByConstReference(const cutio::event::UtcTime& x) {
-  printf("%s\n", x.toString().c_str());
+using namespace cutio::event;
+
+void passByConstReference(const UtcTime& x) {
+  printf("%s\n", x.ToString().c_str());
 }
 
-void passByValue(cutio::event::UtcTime x) {
-  printf("%s\n", x.toString().c_str());
+void passByValue(UtcTime x) {
+  printf("%s\n", x.ToString().c_str());
 }
 
 int main() {
-  auto now(cutio::event::UtcTime::now());
-  printf("%s\n", now.toString().c_str());
+  auto now(UtcTime::Now());
+  printf("%s\n", now.ToString().c_str());
   passByConstReference(now);
   passByValue(now);
   return 0;

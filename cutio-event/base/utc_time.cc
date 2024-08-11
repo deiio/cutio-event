@@ -19,7 +19,7 @@ UtcTime::UtcTime()
 UtcTime::UtcTime(int64_t microSecondsSinceEpoch)
   : microSecondsSinceEpoch_(microSecondsSinceEpoch) {}
 
-string UtcTime::toString() const {
+string UtcTime::ToString() const {
   char buf[32] = {0};
   int64_t seconds = microSecondsSinceEpoch_ / kMicroSecondsPerSecond;
   int64_t microseconds = microSecondsSinceEpoch_ % kMicroSecondsPerSecond;
@@ -28,11 +28,15 @@ string UtcTime::toString() const {
   return buf;
 }
 
-UtcTime UtcTime::now() {
+UtcTime UtcTime::Now() {
   struct timeval tv;
   gettimeofday(&tv, nullptr);
   int64_t seconds = tv.tv_sec;
   return UtcTime(seconds * kMicroSecondsPerSecond + tv.tv_usec);
+}
+
+UtcTime UtcTime::Invalid() {
+  return {};
 }
 
 } // event
