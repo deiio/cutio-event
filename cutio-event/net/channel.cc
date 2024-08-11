@@ -16,13 +16,18 @@ const int Channel::kReadEvent = POLLIN;
 Channel::Channel(EventLoop* loop, int fd)
   : loop_(loop),
     fd_(fd),
-    events_(0) {}
+    events_(0),
+    revents_(0),
+    index_(-1) {}
 
 Channel::~Channel() {}
 
 void Channel::HandleEvent() {
   if ((revents_ & POLLHUP) && !(revents_ & POLLIN)) {
     // Close
+  }
+  if (revents_ & POLLNVAL) {
+    perror("Channel::HandleEvent() POLLNVAL");
   }
   if (revents_ & (POLLERR | POLLNVAL)) {
     if (error_callback_) error_callback_();

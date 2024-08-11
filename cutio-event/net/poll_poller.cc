@@ -7,6 +7,7 @@
 #include <cutio-event/net/poll_poller.h>
 
 #include <assert.h>
+#include <stdio.h>
 
 #include <cutio-event/net/channel.h>
 
@@ -28,7 +29,31 @@ void PollPoller::Poll(int timeout_ms, ChannelList* active_channels) {
 }
 
 void PollPoller::UpdateChannel(Channel* channel) {
-
+  if (channel->Index() < 0) {
+    // A new one, add to poll_fds_
+    assert(channels_.find(channel->Fd()) == channels_.end());
+    pollfd pfd{};
+    pfd.fd = channel->Fd();
+    pfd.events = static_cast<short>(channel->Events());
+    pfd.revents = 0;
+    poll_fds_.push_back(pfd);
+    channel->SetIndex(static_cast<int>(poll_fds_.size() - 1));
+    channels_[pfd.fd] = channel;
+  } else {
+    // Update existing one
+    assert(channels_.find(channel->Fd()) != channels_.end());
+    assert(channels_[channel->Fd()] == channel);
+    int idx = channel->Index();
+    assert(0 <= idx && idx < static_cast<int>(poll_fds_.size()));
+    auto& pfd = poll_fds_[static_cast<unsigned long>(idx)];
+    assert(pfd.fd == channel->Fd() || pfd.fd == -1);
+    pfd.events = static_cast<short>(channel->Events());
+    if (pfd.events == 0) {
+      // Ignore this pollfd
+      pfd.fd = -1;
+      printf("set pfd.fd=-1 for fd=%d\n", channel->Fd());
+    }
+  }
 }
 
 }  // namespace event

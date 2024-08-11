@@ -6,8 +6,9 @@
 
 #include <cutio-event/net/timer_queue.h>
 
-#include <inttypes.h>
-#include <string.h>
+#include <cassert>
+#include <cinttypes>
+#include <cstring>
 #include <sys/timerfd.h>
 #include <unistd.h>
 
@@ -29,16 +30,29 @@ int CreateTimerFd() {
   return timer_fd;
 }
 
-struct timespec HowMuchTimeFromNow(UtcTime then) {
-  int64_t microseconds = then.MicroSecondsSinceEpoch() - UtcTime::Now().MicroSecondsSinceEpoch();
+struct timespec HowMuchTimeFromNow(UtcTime when) {
+  int64_t microseconds = when.MicroSecondsSinceEpoch() - UtcTime::Now().MicroSecondsSinceEpoch();
   if (microseconds < 100) {
     microseconds = 100;
   }
 
-  timespec ts;
+  timespec ts{};
   ts.tv_sec = static_cast<time_t>(microseconds / UtcTime::kMicroSecondsPerSecond);
   ts.tv_nsec = static_cast<long>((microseconds % UtcTime::kMicroSecondsPerSecond) * 1000);
   return ts;
+}
+
+void ResetTimerFd(int timer_fd, UtcTime when) {
+  // Wake up loop by timerfd_settime().
+  itimerspec new_value{};
+  itimerspec old_value{};
+  memset(&new_value, 0, sizeof(new_value));
+  memset(&old_value, 0, sizeof(old_value));
+  new_value.it_value = HowMuchTimeFromNow(when);
+  int ret = timerfd_settime(timer_fd, 0, &new_value, &old_value);
+  if (ret) {
+    perror("Error in timerfd_settime");
+  }
 }
 
 }  // anonymous namespace
@@ -57,36 +71,21 @@ TimerQueue::TimerQueue(EventLoop* loop)
 TimerQueue::~TimerQueue() {
   ::close(timer_fd_);
   // Don't remove the channel, since we're in EventLoop::dtor();
+  for (auto* timer : timers_) {
+    delete timer;
+  }
 }
 
-TimerId TimerQueue::Schedule(const TimerQueue::TimerCallback& cb, UtcTime at, double interval) {
-  Timer* timer = new Timer(cb, at, interval);
-  bool earliest_changed = false;
+TimerId TimerQueue::Schedule(const TimerQueue::TimerCallback& cb, UtcTime when, double interval) {
+  auto* timer = new Timer(cb, when, interval);
+  bool earliest_changed;
   {
     MutexLockGuard lock(mutex_);
-    auto it = timers_.begin();
-    if (it == timers_.end() || (*it)->Expiration().After(at)) {
-      timers_.push_front(timer);
-      earliest_changed = true;
-    } else {
-      while (it != timers_.end() && (*it)->Expiration().Before(at)) {
-        ++it;
-      }
-      timers_.insert(it, timer);
-    }
+    earliest_changed = InsertWithLockHold(timer);
   }
 
   if (earliest_changed) {
-    // Wake up loop by timerfd_settime().
-    itimerspec new_value;
-    itimerspec old_value;
-    memset(&new_value, 0, sizeof(new_value));
-    memset(&old_value, 0, sizeof(old_value));
-    new_value.it_value = HowMuchTimeFromNow(at);
-    int ret = timerfd_settime(timer_fd_, 0, &new_value, &old_value);
-    if (ret) {
-      perror("Error in timerfd_settime");
-    }
+    ResetTimerFd(timer_fd_, when);
   }
 
   return TimerId(timer);
@@ -96,13 +95,72 @@ void TimerQueue::Cancel(TimerId timer_id) {
 
 }
 
+// FIXME: replace linked-list operations with binary-heap.
 void TimerQueue::Timeout() {
+  loop_->AssertInLoopThread();
+  UtcTime now = UtcTime::Now();
   uint64_t how_many;
   ssize_t n = ::read(timer_fd_, &how_many, sizeof(how_many));
-  printf("timeout %" PRIu64 "\n", how_many);
+  printf("TimerQueue::timeout() %" PRIu64 " at %s\n", how_many, now.ToString().c_str());
   if (n != sizeof(how_many)) {
     fprintf(stderr, "TimerQueue::timeout() reads %zd bytes instead of 8\n", n);
   }
+
+  TimerList expired;
+  // Move out all expired timers.
+  {
+    MutexLockGuard lock(mutex_);
+    // Shall never call back in critical section.
+    auto it = timers_.begin();
+    while (it != timers_.end() && !(*it)->Expiration().After(now)) {
+      ++it;
+    }
+    assert(it == timers_.end() || (*it)->Expiration().After(now));
+    expired.splice(expired.begin(), timers_, timers_.begin(), it);
+  }
+
+  // Safe to callback outside critical section.
+  for (auto& timer : expired) {
+    timer->Run();
+  }
+
+  UtcTime next_expire;
+  {
+    MutexLockGuard lock(mutex_);
+    //Shall never call back in critical section
+    for (auto& timer : expired) {
+      if (timer->Repeat()) {
+        timer->Restart(now);
+        InsertWithLockHold(timer);
+      } else {
+        delete timer;
+      }
+    }
+    if (!timers_.empty()) {
+      next_expire = timers_.front()->Expiration();
+    }
+  }
+
+  if (next_expire.Valid()) {
+    ResetTimerFd(timer_fd_, next_expire);
+  }
+}
+
+bool TimerQueue::InsertWithLockHold(Timer* timer) {
+  bool earliest_changed = false;
+  UtcTime when = timer->Expiration();
+  auto it = timers_.begin();
+  if (it == timers_.end() || (*it)->Expiration().After(when)) {
+    timers_.push_front(timer);
+    earliest_changed = true;
+  } else {
+    while (it != timers_.end() && (*it)->Expiration().Before(when)) {
+      ++it;
+    }
+    timers_.insert(it, timer);
+  }
+
+  return earliest_changed;
 }
 
 }  // namespace event

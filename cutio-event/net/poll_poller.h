@@ -28,9 +28,14 @@ class PollPoller : public Poller {
   void UpdateChannel(Channel* channel) override;
 
  private:
+  void FillActiveChannels(int num_events, ChannelList* active_channels) const;
+
+ private:
   typedef std::vector<struct pollfd> PollFdList;
+  typedef std::map<int, Channel*> ChannelMap;
+
   PollFdList poll_fds_;
-  std::map<int, Channel*> channels_;
+  ChannelMap channels_;
 };
 
 }  // namespace event

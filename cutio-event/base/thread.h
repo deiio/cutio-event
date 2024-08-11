@@ -20,7 +20,7 @@ class Thread : noncopyable {
  public:
   typedef std::function<void()> ThreadFunc;
 
-  explicit Thread(ThreadFunc  func);
+  explicit Thread(ThreadFunc func);
   ~Thread();
 
   void Start();

@@ -67,17 +67,20 @@ class EventLoop : noncopyable {
   void UpdateChannel(Channel* channel);
   void RemoveChannel(Channel* channel);
 
+  pid_t ThreadId() const { return thread_id_; }
+  void AssertInLoopThread() const;
+
  private:
   void WakedUp();
 
  private:
   typedef std::vector<Channel*> ChannelList;
 
-  std::unique_ptr<Poller> poller_;
-  std::unique_ptr<TimerQueue> timer_queue_;
   std::atomic_bool looping_;
   std::atomic_bool quit_;
   const pid_t thread_id_;
+  std::unique_ptr<Poller> poller_;
+  std::unique_ptr<TimerQueue> timer_queue_;
   int wakeup_fd_;
   // Unlink in TimerQueue, which is an internal calss,
   // we don't expose Channel to client.

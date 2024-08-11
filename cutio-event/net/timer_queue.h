@@ -35,26 +35,28 @@ class TimerQueue : noncopyable {
   ~TimerQueue();
 
   /**
-   * Schedules the callback to be run at given time,
+   * Schedules the callback to be run when given time,
    * repeats if @c interval > 0.
    *
-   * Must be thread safe.
+   * Must be thread safe. Usually be called from other threads.
    */
-  TimerId Schedule(const TimerCallback& cb, UtcTime at, double interval);
+  TimerId Schedule(const TimerCallback& cb, UtcTime when, double interval);
 
   void Cancel(TimerId timer_id);
 
  private:
-  void Timeout();
+  void Timeout();  // Called when timer_fd_ arms.
+  bool InsertWithLockHold(Timer* timer);  // Insert timer in sorted list.
 
  private:
+  // FIXME: use unique_ptr<Timer> instead of raw pointers.
   typedef std::list<Timer*> TimerList;
 
   EventLoop* loop_;
   const int timer_fd_;
   Channel timer_fd_channel_;
   MutexLock mutex_;
-  TimerList timers_;
+  TimerList timers_;  // Timer list sorted by expiration, @guardedBy mutex_
 };
 
 }  // namespace event

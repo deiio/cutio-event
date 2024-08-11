@@ -34,11 +34,11 @@ int CreateEventFd() {
 }  // anonymous namespace
 
 EventLoop::EventLoop()
-  : poller_(Poller::NewDefaultPoller()),
-    timer_queue_(new TimerQueue(this)),
-    looping_(false),
+  : looping_(false),
     quit_(false),
     thread_id_(CurrentThread::tid()),
+    poller_(Poller::NewDefaultPoller()),
+    timer_queue_(new TimerQueue(this)),
     wakeup_fd_(CreateEventFd()),
     wakeup_channel_(new Channel(this, wakeup_fd_)) {
   wakeup_channel_->SetReadCallback([this] { WakedUp(); });
@@ -53,6 +53,7 @@ EventLoop::~EventLoop() {
 
 void EventLoop::Loop() {
   assert(!looping_);
+  AssertInLoopThread();
   looping_ = true;
   while (!quit_) {
     active_channels_.clear();
@@ -104,11 +105,16 @@ void EventLoop::Cancel(TimerId timer_id) {
 
 void EventLoop::UpdateChannel(Channel* channel) {
   assert(channel->GetLoop() == this);
+  AssertInLoopThread();
   poller_->UpdateChannel(channel);
 }
 
 void EventLoop::RemoveChannel(Channel* channel) {
+  assert(channel->GetLoop() == this);
+}
 
+void EventLoop::AssertInLoopThread() const {
+  assert(thread_id_ == CurrentThread::tid());
 }
 
 void EventLoop::WakedUp() {

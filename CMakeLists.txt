@@ -4,7 +4,7 @@
 # project cutio-event.
 #
 
-cmake_minimum_required(VERSION 2.7)
+cmake_minimum_required(VERSION 2.9)
 
 project(cutio-event CXX)
 
@@ -34,7 +34,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
-string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
+set(BUILD_TYPE "DEBUG")
+if(CMAKE_BUILD_TYPE)
+    string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
+endif()
 message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
 
 include_directories(${PROJECT_SOURCE_DIR})

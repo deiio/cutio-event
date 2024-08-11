@@ -23,9 +23,9 @@ class Timer : noncopyable {
  public:
   typedef std::function<void()> TimerCallback;
 
-  Timer(TimerCallback cb, UtcTime at, double interval)
+  Timer(TimerCallback cb, UtcTime when, double interval)
     : cb_(std::move(cb)),
-      expiration_(at),
+      expiration_(when),
       interval_(interval),
       repeat_(interval > 0.0) {}
 

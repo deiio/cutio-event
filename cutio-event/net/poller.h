@@ -27,7 +27,16 @@ class Poller : noncopyable {
 
   virtual ~Poller() = default;
 
+  /**
+   * Polls the I/O events.
+   * Must be called in the loop thread.
+   */
   virtual void Poll(int timeout_ms, ChannelList* active_channels) = 0;
+
+  /**
+   * Changes the interested I/O events.
+   * Must be called in the loop thread.
+   */
   virtual void UpdateChannel(Channel* channel) = 0;
 
   static Poller* NewDefaultPoller();

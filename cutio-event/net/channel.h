@@ -43,6 +43,9 @@ class Channel : noncopyable {
   void SetEvents(int evt) { events_ = evt; }
   void SetREvents(int revt) { revents_ = revt; }
 
+  int Index() const { return index_; }
+  void SetIndex(int idx) { index_ = idx; }
+
   EventLoop* GetLoop() { return loop_; }
 
  private:
@@ -50,6 +53,7 @@ class Channel : noncopyable {
   const int     fd_;
   int           events_;
   int           revents_;
+  int           index_;   // Used by PollPoller
   EventCallback read_callback_;
   EventCallback write_callback_;
   EventCallback error_callback_;
