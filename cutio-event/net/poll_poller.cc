@@ -6,8 +6,8 @@
 
 #include <cutio-event/net/poll_poller.h>
 
-#include <assert.h>
-#include <stdio.h>
+#include <cassert>
+#include <cstdio>
 
 #include <cutio-event/net/channel.h>
 
