@@ -13,7 +13,7 @@ void Timer::Restart(Timestamp now) {
   if (repeat_) {
     expiration_ = AddTime(now, interval_);
   } else {
-    expiration_ = Timestamp::Timestamp();
+    expiration_ = Timestamp::Invalid();
   }
 }
 

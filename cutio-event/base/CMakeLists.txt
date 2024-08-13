@@ -5,8 +5,9 @@
 #
 
 set(base_SRCS
+    logger.cc
     thread.cc
-        timestamp.cc
+    timestamp.cc
 )
 
 add_library(cutio-event_base ${base_SRCS})

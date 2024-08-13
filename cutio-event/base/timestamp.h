@@ -30,6 +30,7 @@ class Timestamp {
   // Default copy/assignment are okay.
 
   string ToString() const;
+  string ToFormattedString() const;
 
   bool Valid() const {
     return microSecondsSinceEpoch_ > 0;

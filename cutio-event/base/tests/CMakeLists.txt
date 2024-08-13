@@ -4,5 +4,5 @@
 # project cutio-event.
 #
 
-add_executable(utc_time_unittest utc_time_unittest.cc)
-target_link_libraries(utc_time_unittest cutio-event_base)
+add_executable(timestamp_unittest timestamp_unittest.cc)
+target_link_libraries(timestamp_unittest cutio-event_base)

@@ -6,21 +6,21 @@
 
 #include <cutio-event/base/timestamp.h>
 
-#include <stdio.h>
+#include <cutio-event/base/logger.h>
 
 using namespace cutio::event;
 
 void passByConstReference(const Timestamp& x) {
-  printf("%s\n", x.ToString().c_str());
+  LOG_TRACE << x.ToString();
 }
 
 void passByValue(Timestamp x) {
-  printf("%s\n", x.ToString().c_str());
+  LOG_TRACE << x.ToString();
 }
 
 int main() {
-  auto now(Timestamp::Timestamp());
-  printf("%s\n", now.ToString().c_str());
+  auto now(Timestamp::Now());
+  LOG_TRACE << now.ToString();
   passByConstReference(now);
   passByValue(now);
   return 0;

@@ -31,7 +31,7 @@ int CreateTimerFd() {
 }
 
 struct timespec HowMuchTimeFromNow(Timestamp when) {
-  int64_t microseconds = when.MicroSecondsSinceEpoch() - Timestamp::Timestamp().MicroSecondsSinceEpoch();
+  int64_t microseconds = when.MicroSecondsSinceEpoch() - Timestamp::Now().MicroSecondsSinceEpoch();
   if (microseconds < 100) {
     microseconds = 100;
   }
@@ -98,7 +98,7 @@ void TimerQueue::Cancel(TimerId timer_id) {
 // FIXME: replace linked-list operations with binary-heap.
 void TimerQueue::Timeout() {
   loop_->AssertInLoopThread();
-  Timestamp now = Timestamp::Timestamp();
+  Timestamp now = Timestamp::Now();
   uint64_t how_many;
   ssize_t n = ::read(timer_fd_, &how_many, sizeof(how_many));
   printf("TimerQueue::timeout() %" PRIu64 " at %s\n", how_many, now.ToString().c_str());

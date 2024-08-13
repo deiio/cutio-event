@@ -9,6 +9,7 @@
 
 #include <functional>
 
+#include <cutio-event/base/logger.h>
 #include <cutio-event/base/thread.h>
 #include <cutio-event/net/event_loop.h>
 
@@ -20,7 +21,7 @@ void ThreadFunc() {
 }
 
 int main() {
-  printf("pid = %d, tid = %d\n", getpid(), CurrentThread::tid());
+  LOG_INFO << "pid = " << getpid() << ", tid = " << CurrentThread::tid();
 
   EventLoop loop;
 

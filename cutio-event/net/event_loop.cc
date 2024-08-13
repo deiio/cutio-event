@@ -90,12 +90,12 @@ TimerId EventLoop::RunAt(const Timestamp& time, const EventLoop::TimerCallback& 
 }
 
 TimerId EventLoop::RunAfter(double delay, const EventLoop::TimerCallback& cb) {
-  Timestamp time(AddTime(Timestamp::Timestamp(), delay));
+  Timestamp time(AddTime(Timestamp::Now(), delay));
   return RunAt(time, cb);
 }
 
 TimerId EventLoop::RunEvery(double interval, const EventLoop::TimerCallback& cb) {
-  Timestamp time(AddTime(Timestamp::Timestamp(), interval));
+  Timestamp time(AddTime(Timestamp::Now(), interval));
   return timer_queue_->Schedule(cb, time, interval);
 }
 

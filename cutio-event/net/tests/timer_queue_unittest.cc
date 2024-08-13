@@ -9,6 +9,7 @@
 
 #include <functional>
 
+#include <cutio-event/base/logger.h>
 #include <cutio-event/base/thread.h>
 #include <cutio-event/net/event_loop.h>
 
@@ -18,14 +19,14 @@ int cnt = 0;
 EventLoop* g_loop;
 
 void print(const char* msg) {
-  printf("msg %s %s\n", Timestamp::Timestamp().ToString().c_str(), msg);
+  LOG_INFO << "msg " << Timestamp::Now().ToString() << " " << msg;
   if (++cnt == 20) {
     g_loop->Quit();
   }
 }
 
 int main() {
-  printf("pid = %d, tid = %d\n", getpid(), CurrentThread::tid());
+  LOG_INFO << "pid = " << getpid() << ", tid = " << CurrentThread::tid();
   sleep(1);
 
   {
