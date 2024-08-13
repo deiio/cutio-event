@@ -11,7 +11,7 @@
 #include <utility>
 
 #include <cutio-event/base/noncopyable.h>
-#include <cutio-event/base/utc_time.h>
+#include <cutio-event/base/timestamp.h>
 
 namespace cutio {
 namespace event {
@@ -23,7 +23,7 @@ class Timer : noncopyable {
  public:
   typedef std::function<void()> TimerCallback;
 
-  Timer(TimerCallback cb, UtcTime when, double interval)
+  Timer(TimerCallback cb, Timestamp when, double interval)
     : cb_(std::move(cb)),
       expiration_(when),
       interval_(interval),
@@ -31,14 +31,14 @@ class Timer : noncopyable {
 
   void Run() const { cb_(); }
 
-  UtcTime Expiration() const { return expiration_; }
+  Timestamp Expiration() const { return expiration_; }
   bool Repeat() const { return repeat_; }
 
-  void Restart(UtcTime now);
+  void Restart(Timestamp now);
 
  private:
   const TimerCallback cb_;
-  UtcTime expiration_;
+  Timestamp expiration_;
   const double interval_;
   const bool repeat_;
 };

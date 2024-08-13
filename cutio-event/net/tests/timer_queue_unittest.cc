@@ -18,7 +18,7 @@ int cnt = 0;
 EventLoop* g_loop;
 
 void print(const char* msg) {
-  printf("msg %s %s\n", UtcTime::Now().ToString().c_str(), msg);
+  printf("msg %s %s\n", Timestamp::Timestamp().ToString().c_str(), msg);
   if (++cnt == 20) {
     g_loop->Quit();
   }

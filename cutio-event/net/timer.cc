@@ -9,11 +9,11 @@
 namespace cutio {
 namespace event {
 
-void Timer::Restart(UtcTime now) {
+void Timer::Restart(Timestamp now) {
   if (repeat_) {
     expiration_ = AddTime(now, interval_);
   } else {
-    expiration_ = UtcTime::Invalid();
+    expiration_ = Timestamp::Timestamp();
   }
 }
 

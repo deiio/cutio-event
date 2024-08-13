@@ -13,7 +13,7 @@
 #include <vector>
 
 #include <cutio-event/base/noncopyable.h>
-#include <cutio-event/base/utc_time.h>
+#include <cutio-event/base/timestamp.h>
 #include <cutio-event/net/timer_id.h>
 
 namespace cutio {
@@ -50,7 +50,7 @@ class EventLoop : noncopyable {
 
   // Runs callback at the specified time @c time.
   // Safe to call from other threads.
-  TimerId RunAt(const UtcTime& time, const TimerCallback& cb);
+  TimerId RunAt(const Timestamp& time, const TimerCallback& cb);
 
   // Runs callback after @c delay seconds.
   // Safe to call from other threads.

@@ -30,19 +30,19 @@ int CreateTimerFd() {
   return timer_fd;
 }
 
-struct timespec HowMuchTimeFromNow(UtcTime when) {
-  int64_t microseconds = when.MicroSecondsSinceEpoch() - UtcTime::Now().MicroSecondsSinceEpoch();
+struct timespec HowMuchTimeFromNow(Timestamp when) {
+  int64_t microseconds = when.MicroSecondsSinceEpoch() - Timestamp::Timestamp().MicroSecondsSinceEpoch();
   if (microseconds < 100) {
     microseconds = 100;
   }
 
   timespec ts{};
-  ts.tv_sec = static_cast<time_t>(microseconds / UtcTime::kMicroSecondsPerSecond);
-  ts.tv_nsec = static_cast<long>((microseconds % UtcTime::kMicroSecondsPerSecond) * 1000);
+  ts.tv_sec = static_cast<time_t>(microseconds / Timestamp::kMicroSecondsPerSecond);
+  ts.tv_nsec = static_cast<long>((microseconds % Timestamp::kMicroSecondsPerSecond) * 1000);
   return ts;
 }
 
-void ResetTimerFd(int timer_fd, UtcTime when) {
+void ResetTimerFd(int timer_fd, Timestamp when) {
   // Wake up loop by timerfd_settime().
   itimerspec new_value{};
   itimerspec old_value{};
@@ -76,7 +76,7 @@ TimerQueue::~TimerQueue() {
   }
 }
 
-TimerId TimerQueue::Schedule(const TimerQueue::TimerCallback& cb, UtcTime when, double interval) {
+TimerId TimerQueue::Schedule(const TimerQueue::TimerCallback& cb, Timestamp when, double interval) {
   auto* timer = new Timer(cb, when, interval);
   bool earliest_changed;
   {
@@ -98,7 +98,7 @@ void TimerQueue::Cancel(TimerId timer_id) {
 // FIXME: replace linked-list operations with binary-heap.
 void TimerQueue::Timeout() {
   loop_->AssertInLoopThread();
-  UtcTime now = UtcTime::Now();
+  Timestamp now = Timestamp::Timestamp();
   uint64_t how_many;
   ssize_t n = ::read(timer_fd_, &how_many, sizeof(how_many));
   printf("TimerQueue::timeout() %" PRIu64 " at %s\n", how_many, now.ToString().c_str());
@@ -124,7 +124,7 @@ void TimerQueue::Timeout() {
     timer->Run();
   }
 
-  UtcTime next_expire;
+  Timestamp next_expire;
   {
     MutexLockGuard lock(mutex_);
     //Shall never call back in critical section
@@ -149,7 +149,7 @@ void TimerQueue::Timeout() {
 
 bool TimerQueue::InsertWithLockHold(Timer* timer) {
   bool earliest_changed = false;
-  UtcTime when = timer->Expiration();
+  Timestamp when = timer->Expiration();
   auto it = timers_.begin();
   if (it == timers_.end() || (*it)->Expiration().After(when)) {
     timers_.push_front(timer);

@@ -12,7 +12,7 @@
 
 #include <cutio-event/base/mutex.h>
 #include <cutio-event/base/noncopyable.h>
-#include <cutio-event/base/utc_time.h>
+#include <cutio-event/base/timestamp.h>
 #include <cutio-event/net/channel.h>
 
 namespace cutio {
@@ -40,7 +40,7 @@ class TimerQueue : noncopyable {
    *
    * Must be thread safe. Usually be called from other threads.
    */
-  TimerId Schedule(const TimerCallback& cb, UtcTime when, double interval);
+  TimerId Schedule(const TimerCallback& cb, Timestamp when, double interval);
 
   void Cancel(TimerId timer_id);
 

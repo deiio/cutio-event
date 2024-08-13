@@ -19,13 +19,13 @@ namespace event {
  * It's recommended to pass it by value, since it's passed in register
  * on x64.
  */
-class UtcTime {
+class Timestamp {
  public:
-  // Constructs an Invalid UtcTime.
-  UtcTime();
+  // Constructs an Invalid Timestamp.
+  Timestamp();
 
-  // Constructs a UtcTime at specific time.
-  explicit UtcTime(int64_t microSecondsSinceEpoch);
+  // Constructs a Timestamp at specific time.
+  explicit Timestamp(int64_t microSecondsSinceEpoch);
 
   // Default copy/assignment are okay.
 
@@ -35,15 +35,15 @@ class UtcTime {
     return microSecondsSinceEpoch_ > 0;
   }
 
-  bool Before(UtcTime rhs) const {
+  bool Before(Timestamp rhs) const {
     return microSecondsSinceEpoch_ < rhs.microSecondsSinceEpoch_;
   }
 
-  bool After(UtcTime rhs) const {
+  bool After(Timestamp rhs) const {
     return microSecondsSinceEpoch_ > rhs.microSecondsSinceEpoch_;
   }
 
-  bool Equals(UtcTime rhs) const {
+  bool Equals(Timestamp rhs) const {
     return microSecondsSinceEpoch_ == rhs.microSecondsSinceEpoch_;
   }
 
@@ -53,19 +53,19 @@ class UtcTime {
   }
 
   // Get time of Now.
-  static UtcTime Now();
-  static UtcTime Invalid();
+  static Timestamp Now();
+  static Timestamp Invalid();
   static const int kMicroSecondsPerSecond = 1000 * 1000;
 
  private:
   int64_t microSecondsSinceEpoch_;
 };
 
-inline bool operator<(UtcTime lhs, UtcTime rhs) {
+inline bool operator<(Timestamp lhs, Timestamp rhs) {
   return lhs.Before(rhs);
 }
 
-inline bool operator==(UtcTime lhs, UtcTime rhs) {
+inline bool operator==(Timestamp lhs, Timestamp rhs) {
   return lhs.Equals(rhs);
 }
 
@@ -75,20 +75,20 @@ inline bool operator==(UtcTime lhs, UtcTime rhs) {
  * @param high, low
  * @return (high - low) in seconds
  */
-inline double TimeDifference(UtcTime high, UtcTime low) {
+inline double TimeDifference(Timestamp high, Timestamp low) {
   auto diff = high.MicroSecondsSinceEpoch() - low.MicroSecondsSinceEpoch();
-  return static_cast<double>(diff) / UtcTime::kMicroSecondsPerSecond;
+  return static_cast<double>(diff) / Timestamp::kMicroSecondsPerSecond;
 }
 
 /**
  * Add @c seconds to given timestamp.
  *
  * @param timestamp, seconds
- * @return timestamp + seconds at UtcTime
+ * @return timestamp + seconds at Timestamp
  */
-inline UtcTime AddTime(UtcTime timestamp, double seconds) {
-  auto delta = static_cast<int64_t>(seconds * UtcTime::kMicroSecondsPerSecond);
-  return UtcTime(timestamp.MicroSecondsSinceEpoch() + delta);
+inline Timestamp AddTime(Timestamp timestamp, double seconds) {
+  auto delta = static_cast<int64_t>(seconds * Timestamp::kMicroSecondsPerSecond);
+  return Timestamp(timestamp.MicroSecondsSinceEpoch() + delta);
 }
 
 }  // namespace event

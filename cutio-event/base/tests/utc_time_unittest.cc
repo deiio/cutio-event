@@ -4,22 +4,22 @@
 // project cutio-event.
 //
 
-#include <cutio-event/base/utc_time.h>
+#include <cutio-event/base/timestamp.h>
 
 #include <stdio.h>
 
 using namespace cutio::event;
 
-void passByConstReference(const UtcTime& x) {
+void passByConstReference(const Timestamp& x) {
   printf("%s\n", x.ToString().c_str());
 }
 
-void passByValue(UtcTime x) {
+void passByValue(Timestamp x) {
   printf("%s\n", x.ToString().c_str());
 }
 
 int main() {
-  auto now(UtcTime::Now());
+  auto now(Timestamp::Timestamp());
   printf("%s\n", now.ToString().c_str());
   passByConstReference(now);
   passByValue(now);

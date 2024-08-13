@@ -4,7 +4,7 @@
 // project cutio-event.
 //
 
-#include <cutio-event/base/utc_time.h>
+#include <cutio-event/base/timestamp.h>
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -13,13 +13,13 @@
 namespace cutio {
 namespace event {
 
-UtcTime::UtcTime()
+Timestamp::Timestamp()
   : microSecondsSinceEpoch_(0){}
 
-UtcTime::UtcTime(int64_t microSecondsSinceEpoch)
+Timestamp::Timestamp(int64_t microSecondsSinceEpoch)
   : microSecondsSinceEpoch_(microSecondsSinceEpoch) {}
 
-string UtcTime::ToString() const {
+string Timestamp::ToString() const {
   char buf[32] = {0};
   int64_t seconds = microSecondsSinceEpoch_ / kMicroSecondsPerSecond;
   int64_t microseconds = microSecondsSinceEpoch_ % kMicroSecondsPerSecond;
@@ -28,14 +28,14 @@ string UtcTime::ToString() const {
   return buf;
 }
 
-UtcTime UtcTime::Now() {
+Timestamp Timestamp::Now() {
   struct timeval tv;
   gettimeofday(&tv, nullptr);
   int64_t seconds = tv.tv_sec;
-  return UtcTime(seconds * kMicroSecondsPerSecond + tv.tv_usec);
+  return Timestamp(seconds * kMicroSecondsPerSecond + tv.tv_usec);
 }
 
-UtcTime UtcTime::Invalid() {
+Timestamp Timestamp::Invalid() {
   return {};
 }
 

@@ -6,7 +6,7 @@
 
 set(base_SRCS
     thread.cc
-    utc_time.cc
+        timestamp.cc
 )
 
 add_library(cutio-event_base ${base_SRCS})
