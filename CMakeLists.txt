@@ -15,6 +15,7 @@ set(CXX_FLAGS
     -Werror
     -Wconversion
     -Wold-style-cast
+    -MMD
     -Wpointer-arith
     -Wshadow
     -Wno-unused-parameter

@@ -133,6 +133,7 @@ void TimerQueue::Timeout() {
         timer->Restart(now);
         InsertWithLockHold(timer);
       } else {
+        // FIXME: move to a free list.
         delete timer;
       }
     }

@@ -53,4 +53,9 @@ class MutexLockGuard : noncopyable {
 }  // namespace event
 }  // namespace cutio
 
+// Prevent misuse like:
+// MutexLockGuard(mutex_);
+// A temporary object doesn't hold the lock for long!
+#define MutexLockGuard(x) error "Missing guard object name"
+
 #endif  // CUTIO_EVENT_BASE_MUTEX_H_

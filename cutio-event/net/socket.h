@@ -7,6 +7,8 @@
 #ifndef CUTIO_EVENT_NET_SOCKET_H_
 #define CUTIO_EVENT_NET_SOCKET_H_
 
+#include <cutio-event/base/noncopyable.h>
+
 namespace cutio {
 namespace event {
 
@@ -15,7 +17,7 @@ namespace event {
  *
  * It closes the sockfd when destructs.
  */
-class Socket {
+class Socket : noncopyable {
  public:
   explicit Socket(int sockfd)
     : sockfd_(sockfd) {}
