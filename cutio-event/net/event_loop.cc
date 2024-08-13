@@ -10,6 +10,7 @@
 #include <sys/eventfd.h>
 #include <unistd.h>
 
+#include <cutio-event/base/logger.h>
 #include <cutio-event/base/mutex.h>
 #include <cutio-event/base/thread.h>
 #include <cutio-event/net/channel.h>
@@ -73,7 +74,7 @@ void EventLoop::Wakeup() {
   uint64_t one = 1;
   ssize_t n = ::write(wakeup_fd_, &one, sizeof(one));
   if (n != sizeof(one)) {
-    fprintf(stderr, "EventLoop::wakeup() write %zd bytes instead of 8\n", n);
+    LOG_ERROR << "EventLoop::wakeup() write " << n << " bytes instead of 8";
   }
 }
 

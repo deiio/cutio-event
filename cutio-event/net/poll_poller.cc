@@ -9,6 +9,7 @@
 #include <cassert>
 #include <cstdio>
 
+#include <cutio-event/base/logger.h>
 #include <cutio-event/net/channel.h>
 
 namespace cutio {
@@ -51,7 +52,6 @@ void PollPoller::UpdateChannel(Channel* channel) {
     if (pfd.events == 0) {
       // Ignore this pollfd
       pfd.fd = -1;
-      printf("set pfd.fd=-1 for fd=%d\n", channel->Fd());
     }
   }
 }

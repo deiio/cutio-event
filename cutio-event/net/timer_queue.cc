@@ -7,11 +7,11 @@
 #include <cutio-event/net/timer_queue.h>
 
 #include <cassert>
-#include <cinttypes>
 #include <cstring>
 #include <sys/timerfd.h>
 #include <unistd.h>
 
+#include <cutio-event/base/logger.h>
 #include <cutio-event/net/channel.h>
 #include <cutio-event/net/event_loop.h>
 #include <cutio-event/net/timer.h>
@@ -24,8 +24,7 @@ namespace {
 int CreateTimerFd() {
   int timer_fd = ::timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
   if (timer_fd < 0) {
-    perror("Failed in timerfd_create");
-    abort();
+    LOG_SYSFATAL << "Failed in timerfd_create()";
   }
   return timer_fd;
 }
@@ -51,7 +50,7 @@ void ResetTimerFd(int timer_fd, Timestamp when) {
   new_value.it_value = HowMuchTimeFromNow(when);
   int ret = timerfd_settime(timer_fd, 0, &new_value, &old_value);
   if (ret) {
-    perror("Error in timerfd_settime");
+    LOG_SYSERR << "Error in timerfd_settime()";
   }
 }
 
@@ -101,9 +100,9 @@ void TimerQueue::Timeout() {
   Timestamp now = Timestamp::Now();
   uint64_t how_many;
   ssize_t n = ::read(timer_fd_, &how_many, sizeof(how_many));
-  printf("TimerQueue::timeout() %" PRIu64 " at %s\n", how_many, now.ToString().c_str());
+  LOG_DEBUG << "TimerQueue::timeout() " << how_many << " at " << now.ToString();
   if (n != sizeof(how_many)) {
-    fprintf(stderr, "TimerQueue::timeout() reads %zd bytes instead of 8\n", n);
+    LOG_ERROR << "TimerQueue::timeout() reads " << n << " bytes instead of 8";
   }
 
   TimerList expired;

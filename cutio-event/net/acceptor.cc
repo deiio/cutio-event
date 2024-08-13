@@ -6,6 +6,7 @@
 
 #include <cutio-event/net/acceptor.h>
 
+#include <cutio-event/base/logger.h>
 #include <cutio-event/net/sockets_ops.h>
 
 namespace cutio {
