@@ -15,6 +15,7 @@ set(net_SRCS
     poller.cc
     socket.cc
     sockets_ops.cc
+    tcp_connection.cc
     tcp_server.cc
     timer.cc
     timer_queue.cc

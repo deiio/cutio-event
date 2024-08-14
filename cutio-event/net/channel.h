@@ -35,6 +35,7 @@ class Channel : noncopyable {
   void HandleEvent();
   void SetReadCallback(const EventCallback& cb) { read_callback_ = cb; }
   void SetWriteCallback(const EventCallback& cb) { write_callback_ = cb; }
+  void SetCloseCallback(const EventCallback& cb) { close_callback_ = cb; }
   void SetErrorCallback(const EventCallback& cb) { error_callback_ = cb; }
 
   int Fd() const { return fd_; }
@@ -56,6 +57,7 @@ class Channel : noncopyable {
   int           index_;   // Used by PollPoller
   EventCallback read_callback_;
   EventCallback write_callback_;
+  EventCallback close_callback_;
   EventCallback error_callback_;
 };
 

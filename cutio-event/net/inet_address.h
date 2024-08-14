@@ -9,6 +9,7 @@
 
 #include <netinet/in.h>
 
+#include <cutio-event/base/copyable.h>
 #include <cutio-event/base/types.h>
 
 namespace cutio {
@@ -16,8 +17,10 @@ namespace event {
 
 /**
  * Wrapper of sockaddr_in.
+ *
+ * This is an interface class.
  */
-class InetAddress {
+class InetAddress : public copyable {
  public:
   /**
    * Constructs an endpoint with given port number.
@@ -30,6 +33,8 @@ class InetAddress {
    * @c host could either be "1.2.3.4" or "furzoom.com"
    */
    InetAddress(string host, uint16_t port);
+
+   // Default copy/assignment are Okay.
 
  private:
   sockaddr_in addr_{};

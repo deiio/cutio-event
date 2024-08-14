@@ -21,6 +21,8 @@ namespace cutio {
 namespace event {
 namespace {
 
+__thread EventLoop* t_loopInThisThread = nullptr;
+
 const int kPollTimeMs = 10000;
 
 int CreateEventFd() {
@@ -42,6 +44,13 @@ EventLoop::EventLoop()
     timer_queue_(new TimerQueue(this)),
     wakeup_fd_(CreateEventFd()),
     wakeup_channel_(new Channel(this, wakeup_fd_)) {
+  if (t_loopInThisThread) {
+    LOG_FATAL << "another EventLoop " << t_loopInThisThread << " exists in this thread "
+              << thread_id_;
+  } else {
+    t_loopInThisThread = this;
+  }
+
   wakeup_channel_->SetReadCallback([this] { WakedUp(); });
   // We are always reading the wakeup_fd_, like the old(2) way.
   wakeup_channel_->SetEvents(Channel::kReadEvent);
@@ -50,6 +59,7 @@ EventLoop::EventLoop()
 
 EventLoop::~EventLoop() {
   ::close(wakeup_fd_);
+  t_loopInThisThread = nullptr;
 }
 
 void EventLoop::Loop() {

@@ -26,8 +26,17 @@ class Thread : noncopyable {
   void Start();
   void Join();
 
+  bool Started() const { return started_; }
+  pthread_t PthreadId() const { return pthread_id_; }
+  pid_t Tid() const { return tid_; }
+
  private:
-  pthread_t ptid_;
+  static void* StartThread(void* thread);
+
+ private:
+  bool started_;
+  pthread_t pthread_id_;
+  pid_t tid_;
   ThreadFunc func_;
 };
 

@@ -15,13 +15,20 @@
 
 using namespace cutio::event;
 
+void Callback() {
+  LOG_DEBUG << "pid = " << getpid() << ", tid = " << CurrentThread::tid();
+  EventLoop anotherLoop;
+}
+
 void ThreadFunc() {
+  LOG_DEBUG << "pid = " << getpid() << ", tid = " << CurrentThread::tid();
   EventLoop loop;
+  loop.RunAfter(1.0, Callback);
   loop.Loop();
 }
 
 int main() {
-  LOG_INFO << "pid = " << getpid() << ", tid = " << CurrentThread::tid();
+  LOG_DEBUG << "pid = " << getpid() << ", tid = " << CurrentThread::tid();
 
   EventLoop loop;
 

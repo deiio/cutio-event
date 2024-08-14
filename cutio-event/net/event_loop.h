@@ -25,6 +25,8 @@ class TimerQueue;
 
 /*
  * Reactor, at most one per thread.
+ *
+ * This is an interface class, so don't expose too much details.
  */
 class EventLoop : noncopyable {
  public:

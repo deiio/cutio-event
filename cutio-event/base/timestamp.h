@@ -7,6 +7,7 @@
 #ifndef CUTIO_EVENT_BASE_UTC_TIME_H_
 #define CUTIO_EVENT_BASE_UTC_TIME_H_
 
+#include <cutio-event/base/copyable.h>
 #include <cutio-event/base/types.h>
 
 namespace cutio {
@@ -19,7 +20,7 @@ namespace event {
  * It's recommended to pass it by value, since it's passed in register
  * on x64.
  */
-class Timestamp {
+class Timestamp : public copyable {
  public:
   // Constructs an Invalid Timestamp.
   Timestamp();

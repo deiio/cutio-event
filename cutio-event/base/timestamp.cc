@@ -13,6 +13,8 @@
 namespace cutio {
 namespace event {
 
+static_assert(sizeof(Timestamp) == sizeof(int64_t), "class Timestamp's size is not 8 bytes");
+
 Timestamp::Timestamp()
   : microSecondsSinceEpoch_(0){}
 

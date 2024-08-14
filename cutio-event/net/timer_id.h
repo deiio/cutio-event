@@ -7,6 +7,8 @@
 #ifndef CUTIO_EVENT_NET_TIMER_ID_H_
 #define CUTIO_EVENT_NET_TIMER_ID_H_
 
+#include <cutio-event/base/copyable.h>
+
 namespace cutio {
 namespace event {
 
@@ -15,7 +17,7 @@ class Timer;
 /**
  * An opaque identifier, for canceling Timer.
  */
-class TimerId {
+class TimerId : public copyable {
  public:
   explicit TimerId(Timer* timer)
     : value_(timer) {}

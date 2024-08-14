@@ -12,15 +12,11 @@
 namespace cutio {
 namespace event {
 
-Acceptor::Acceptor(EventLoop* loop, const InetAddress& server_addr)
+Acceptor::Acceptor(EventLoop* loop, const InetAddress& listen_addr)
   : loop_(loop),
     accept_socket_(sockets::CreateNonblockingOrDie()),
     accept_channel_(loop, accept_socket_.Fd()),
     listening_(false) {}
-
-Acceptor::~Acceptor() {
-
-}
 
 void Acceptor::Accept() {
 

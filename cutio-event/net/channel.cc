@@ -11,7 +11,8 @@
 namespace cutio {
 namespace event {
 
-const int Channel::kReadEvent = POLLIN;
+const int Channel::kReadEvent = POLLIN | POLLPRI;
+const int Channel::kWriteEvent = POLLOUT;
 
 Channel::Channel(EventLoop* loop, int fd)
   : loop_(loop),
@@ -24,7 +25,7 @@ Channel::~Channel() {}
 
 void Channel::HandleEvent() {
   if ((revents_ & POLLHUP) && !(revents_ & POLLIN)) {
-    // Close
+    if (close_callback_) close_callback_();
   }
   if (revents_ & POLLNVAL) {
     perror("Channel::HandleEvent() POLLNVAL");

@@ -15,9 +15,15 @@ namespace event {
 namespace {
 
 typedef sockaddr SA;
-const in_addr_t kInaddrAny = 0;  // INADDR_ANY
+
+// INADDR_ANY use (type)value casting.
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+const in_addr_t kInaddrAny = INADDR_ANY;  // INADDR_ANY
+#pragma GCC diagnostic error "-Wold-style-cast"
 
 }  // anonymous namespace
+
+static_assert(sizeof(InetAddress) == sizeof(struct sockaddr_in), "class InetAddress's size unexpected");
 
 InetAddress::InetAddress(uint16_t port) {
   memset(&addr_, 0, sizeof(addr_));
@@ -27,7 +33,8 @@ InetAddress::InetAddress(uint16_t port) {
 }
 
 InetAddress::InetAddress(string host, uint16_t port) {
-
+  (void)host;
+  (void)port;
 }
 
 }  // namespace event

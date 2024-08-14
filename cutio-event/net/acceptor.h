@@ -25,8 +25,8 @@ class InetAddress;
  */
 class Acceptor : noncopyable {
  public:
-  Acceptor(EventLoop* loop, const InetAddress& server_addr);
-  ~Acceptor();
+  Acceptor(EventLoop* loop, const InetAddress& listen_addr);
+  ~Acceptor() = default;
 
   void Accept();
 
