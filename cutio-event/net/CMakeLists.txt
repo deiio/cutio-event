@@ -17,6 +17,7 @@ set(net_SRCS
     sockets_ops.cc
     tcp_connection.cc
     tcp_server.cc
+    thread_model.cc
     timer.cc
     timer_queue.cc
 )
