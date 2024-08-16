@@ -14,6 +14,7 @@
 
 #include <cutio-event/base/noncopyable.h>
 #include <cutio-event/base/timestamp.h>
+#include <cutio-event/net/callbacks.h>
 #include <cutio-event/net/timer_id.h>
 
 namespace cutio {
@@ -31,7 +32,6 @@ class TimerQueue;
 class EventLoop : noncopyable {
  public:
   typedef std::function<void()> Functor;
-  typedef std::function<void()> TimerCallback;
 
   EventLoop();
   ~EventLoop();

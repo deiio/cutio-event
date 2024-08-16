@@ -25,18 +25,23 @@ class InetAddress;
  */
 class Acceptor : noncopyable {
  public:
+  typedef std::function<void(int fd, const InetAddress&)> NewConnectionCallback;
+
   Acceptor(EventLoop* loop, const InetAddress& listen_addr);
   ~Acceptor() = default;
 
-  void Accept();
-
+  void SetNewConnectionCallback(const NewConnectionCallback& cb) { new_connection_cb_ = cb; }
   bool Listening() const { return listening_; }
   void Listen();
+
+ private:
+  void Accept();
 
  private:
   EventLoop* loop_;
   Socket accept_socket_;
   Channel accept_channel_;
+  NewConnectionCallback new_connection_cb_;
   bool listening_;
 };
 

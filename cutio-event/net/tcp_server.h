@@ -8,8 +8,10 @@
 #define CUTIO_EVENT_NET_TCP_SERVER_H_
 
 #include <memory>
+#include <utility>
 
 #include <cutio-event/base/noncopyable.h>
+#include <cutio-event/net/callbacks.h>
 
 namespace cutio {
 namespace event {
@@ -32,12 +34,30 @@ class TcpServer : noncopyable {
    * Starts the server if it's not listening.
    *
    * It's harmless to call it multiple times.
+   * Not thread safe.
    */
   void Start();
+
+  /**
+   * Set connection callback.
+   * Not thread safe.
+   */
+  void SetConnectionCallback(ConnectionCallback cb) { connection_cb_ = std::move(cb); }
+  /**
+   * Set message callback.
+   * Not thread safe.
+   */
+  void SetReadCallback(MessageCallback cb) { message_cb_ = std::move(cb); }
+
+ private:
+  // Not thread safe.
+  void NewConnection(int fd, const InetAddress& peer_addr);
 
  private:
   EventLoop* loop_;
   std::unique_ptr<Acceptor> acceptor_;
+  ConnectionCallback connection_cb_;
+  MessageCallback message_cb_;
 };
 
 }  // namespace event

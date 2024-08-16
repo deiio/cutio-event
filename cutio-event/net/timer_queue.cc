@@ -75,7 +75,7 @@ TimerQueue::~TimerQueue() {
   }
 }
 
-TimerId TimerQueue::Schedule(const TimerQueue::TimerCallback& cb, Timestamp when, double interval) {
+TimerId TimerQueue::Schedule(const TimerCallback& cb, Timestamp when, double interval) {
   auto* timer = new Timer(cb, when, interval);
   bool earliest_changed;
   {

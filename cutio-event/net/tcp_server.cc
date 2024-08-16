@@ -6,6 +6,8 @@
 
 #include <cutio-event/net/tcp_server.h>
 
+#include <functional>
+
 #include <cutio-event/net/acceptor.h>
 
 namespace cutio {
@@ -13,13 +15,20 @@ namespace event {
 
 TcpServer::TcpServer(EventLoop* loop, const InetAddress& listen_addr)
   : loop_(loop),
-    acceptor_(new Acceptor(loop, listen_addr)) {}
+    acceptor_(new Acceptor(loop, listen_addr)) {
+}
 
 TcpServer::~TcpServer() {
 
 }
 
 void TcpServer::Start() {
+  if (!acceptor_->Listening()) {
+    acceptor_->Listen();
+  }
+}
+
+void TcpServer::NewConnection(int fd, const InetAddress& peer_addr) {
 
 }
 

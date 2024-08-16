@@ -34,6 +34,13 @@ inline uint16_t NetworkToHost16(uint16_t net_short) {
  */
 int CreateNonblockingOrDie();
 
+void BindOrDie(int sockfd, const struct sockaddr_in& addr);
+void ListenOrDie(int sockfd);
+int  Accept(int sockfd, struct sockaddr_in* addr);
+void Close(int sockfd);
+
+void ToHostPort(char* buf, size_t size, const struct sockaddr_in& addr);
+
 }  // namespace sockets
 }  // namespace event
 }  // namespace cutio

@@ -36,6 +36,11 @@ class InetAddress : public copyable {
 
    // Default copy/assignment are Okay.
 
+  string ToHostPort() const;
+
+  const struct sockaddr_in& GetSockAddrInet() const { return addr_; }
+  struct sockaddr_in* GetMutableSockAddrInet() { return &addr_; }
+
  private:
   sockaddr_in addr_{};
 };

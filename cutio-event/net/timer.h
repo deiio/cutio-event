@@ -12,6 +12,7 @@
 
 #include <cutio-event/base/noncopyable.h>
 #include <cutio-event/base/timestamp.h>
+#include <cutio-event/net/callbacks.h>
 
 namespace cutio {
 namespace event {
@@ -21,8 +22,6 @@ namespace event {
  */
 class Timer : noncopyable {
  public:
-  typedef std::function<void()> TimerCallback;
-
   Timer(TimerCallback cb, Timestamp when, double interval)
     : cb_(std::move(cb)),
       expiration_(when),

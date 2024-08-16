@@ -14,8 +14,6 @@ namespace cutio {
 namespace event {
 namespace {
 
-typedef sockaddr SA;
-
 // INADDR_ANY use (type)value casting.
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 const in_addr_t kInaddrAny = INADDR_ANY;  // INADDR_ANY
@@ -35,6 +33,12 @@ InetAddress::InetAddress(uint16_t port) {
 InetAddress::InetAddress(string host, uint16_t port) {
   (void)host;
   (void)port;
+}
+
+string InetAddress::ToHostPort() const {
+  char buf[32];
+  sockets::ToHostPort(buf, sizeof(buf), addr_);
+  return buf;
 }
 
 }  // namespace event

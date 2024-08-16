@@ -7,12 +7,12 @@
 #ifndef CUTIO_EVENT_NET_TIMER_QUEUE_H_
 #define CUTIO_EVENT_NET_TIMER_QUEUE_H_
 
-#include <functional>
 #include <list>
 
 #include <cutio-event/base/mutex.h>
 #include <cutio-event/base/noncopyable.h>
 #include <cutio-event/base/timestamp.h>
+#include <cutio-event/net/callbacks.h>
 #include <cutio-event/net/channel.h>
 
 namespace cutio {
@@ -29,8 +29,6 @@ class TimerId;
  */
 class TimerQueue : noncopyable {
  public:
-  typedef std::function<void()> TimerCallback;
-
   explicit TimerQueue(EventLoop* loop);
   ~TimerQueue();
 
@@ -45,8 +43,10 @@ class TimerQueue : noncopyable {
   void Cancel(TimerId timer_id);
 
  private:
-  void Timeout();  // Called when timer_fd_ arms.
-  bool InsertWithLockHold(Timer* timer);  // Insert timer in sorted list.
+  // Called when timer_fd_ arms.
+  void Timeout();
+  // Insert timer in sorted list.
+  bool InsertWithLockHold(Timer* timer);
 
  private:
   // FIXME: use unique_ptr<Timer> instead of raw pointers.
@@ -56,7 +56,8 @@ class TimerQueue : noncopyable {
   const int timer_fd_;
   Channel timer_fd_channel_;
   MutexLock mutex_;
-  TimerList timers_;  // Timer list sorted by expiration, @guardedBy mutex_
+  // Timer list sorted by expiration, @guardedBy mutex_
+  TimerList timers_;
 };
 
 }  // namespace event
