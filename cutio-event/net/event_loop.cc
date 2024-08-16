@@ -44,6 +44,7 @@ EventLoop::EventLoop()
     timer_queue_(new TimerQueue(this)),
     wakeup_fd_(CreateEventFd()),
     wakeup_channel_(new Channel(this, wakeup_fd_)) {
+  LOG_TRACE << "EventLoop created in thread " << thread_id_;
   if (t_loopInThisThread) {
     LOG_FATAL << "another EventLoop " << t_loopInThisThread << " exists in this thread "
               << thread_id_;
