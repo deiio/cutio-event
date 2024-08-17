@@ -44,6 +44,7 @@
 #include <cutio-event/base/types.h>
 #include <cutio-event/net/event_loop.h>
 #include <cutio-event/net/acceptor.h>
+#include <cutio-event/net/channel_buffer.h>
 #include <cutio-event/net/inet_address.h>
 #include <cutio-event/net/tcp_connection.h>
 #include <cutio-event/net/tcp_server.h>
@@ -57,7 +58,7 @@ class EchoServer {
     : loop_(loop),
       server_(loop, listen_addr) {
     server_.SetConnectionCallback(std::bind(&EchoServer::OnConnection, this, _1));
-    server_.SetReadCallback(std::bind(&EchoServer::OnMessage, this, _1, _2, _3));
+    server_.SetReadCallback(std::bind(&EchoServer::OnMessage, this, _1, _2));
   }
 
   void Start() {
@@ -70,9 +71,10 @@ class EchoServer {
              << conn->LocalAddr().ToHostPort();
   }
 
-  void OnMessage(const TcpConnectionPtr& conn, const void* buf, ssize_t len) {
+  void OnMessage(const TcpConnectionPtr& conn, ChannelBuffer* buf) {
+    auto len = buf->ReadableBytes();
     LOG_INFO << "receive message from " << conn->PeerAddr().ToHostPort()
-             << " (" << len << ")";
+             << " (" << len << "): " << buf->RetrieveAsString();
   }
 
  private:

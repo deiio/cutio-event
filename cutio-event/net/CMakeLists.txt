@@ -39,6 +39,7 @@
 set(net_SRCS
     acceptor.cc
     channel.cc
+    channel_buffer.cc
     default_poller.cc
     epoll_poller.cc
     event_loop.cc

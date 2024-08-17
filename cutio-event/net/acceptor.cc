@@ -58,6 +58,7 @@ Acceptor::Acceptor(EventLoop* loop, const InetAddress& listen_addr)
 }
 
 void Acceptor::Listen() {
+  loop_->AssertInLoopThread();
   listening_ = true;
   accept_socket_.Listen();
   accept_channel_.SetEvents(Channel::kReadEvent);

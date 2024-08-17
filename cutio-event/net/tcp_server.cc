@@ -97,6 +97,7 @@ void TcpServer::NewConnection(int sockfd, const InetAddress& peer_addr) {
   conn->SetConnectionCallback(connection_cb_);
   conn->SetMessageCallback(message_cb_);
   conn->SetCloseCallback(std::bind(&TcpServer::RemoveConnection, this, _1));
+  conn->Connected();
   io_loop->RunInLoop([this, conn] { connection_cb_(conn); });
 }
 

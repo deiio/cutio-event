@@ -109,6 +109,8 @@ inline bool operator==(Timestamp lhs, Timestamp rhs) {
  *
  * @param high, low
  * @return (high - low) in seconds
+ * @c double has 52-bit precision, enough for one-microsecond
+ * resolution for next 100 years.
  */
 inline double TimeDifference(Timestamp high, Timestamp low) {
   auto diff = high.MicroSecondsSinceEpoch() - low.MicroSecondsSinceEpoch();

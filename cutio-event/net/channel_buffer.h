@@ -36,72 +36,70 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+// This si a public header file, it must only include public header files.
 
-#ifndef CUTIO_EVENT_NET_TCP_CONNECTION_H_
-#define CUTIO_EVENT_NET_TCP_CONNECTION_H_
+#ifndef CUTIO_EVENT_NET_CHANNEL_BUFFER_H_
+#define CUTIO_EVENT_NET_CHANNEL_BUFFER_H_
 
-#include <memory>
-#include <utility>
+#include <assert.h>
 
-#include <cutio-event/base/noncopyable.h>
+#include <vector>
+
+#include <cutio-event/base/copyable.h>
 #include <cutio-event/base/types.h>
-#include <cutio-event/net/callbacks.h>
-#include <cutio-event/net/channel_buffer.h>
-#include <cutio-event/net/inet_address.h>
 
 namespace cutio {
 namespace event {
 
-class Channel;
-class EventLoop;
-class Socket;
-
 /**
- * TCP connection, for both client and server usage.
+ * A buffer class modeled after org.jboss.netty.buffer.ChannelBuffer
  *
- * This is an interface class, so don't expose too much details.
+ * @code
+ * +-------------------+------------------+------------------+
+ * | prependable bytes |  readable bytes  |  writable bytes  |
+ * |                   |    (CONTENT)     |                  |
+ * +-------------------+------------------+------------------+
+ * |                   |                  |                  |
+ * 0       <=     readerIndex   <=    writerIndex   <=      size
+ * @endcode
  */
-class TcpConnection : public std::enable_shared_from_this<TcpConnection>,
-                      noncopyable {
+class ChannelBuffer : public copyable {
  public:
-  /**
-   * Constructs a TcpConnection with a connected sockfd.
-   */
-  TcpConnection(string name, EventLoop* loop, int sockfd,
-                const InetAddress& local_addr, const InetAddress& peer_addr);
+  static const size_t kCheapPrepend = 8;
+  static const size_t kInitialSize = 1024;
 
-  const InetAddress& LocalAddr() const { return local_addr_; }
-  const InetAddress& PeerAddr() const { return peer_addr_; }
+  ChannelBuffer()
+    : buffer_(kCheapPrepend + kInitialSize),
+      reader_index_(kCheapPrepend),
+      writer_index_(kCheapPrepend) {
+    assert(ReadableBytes() == 0);
+    assert(WritableBytes() == kInitialSize);
+    assert(PrependableBytes() == kCheapPrepend);
+  }
 
-  void SetConnectionCallback(ConnectionCallback cb) { connection_cb_ = std::move(cb); }
-  void SetMessageCallback(MessageCallback cb) { message_cb_ = std::move(cb); }
-  void SetCloseCallback(ConnectionCallback cb) { close_cb_ = std::move(cb); }
+  size_t ReadableBytes() const { return writer_index_ - reader_index_; }
+  size_t WritableBytes() const { return buffer_.size() - writer_index_; }
+  size_t PrependableBytes() const { return reader_index_; }
 
-  // Called when TcpServer accepts a new connection
-  void Connected();
+  const char* Peek() const { return Begin() + reader_index_; }
+  char* Retrieve(size_t len);
+  string RetrieveAsString();
+  void Append(const char* data, size_t len);
+  void Prepend(const char* data, size_t len);
+  ssize_t ReadFd(int fd, int* saved_errno);
 
  private:
-  void HandleRead();
-  void HandleWrite();
-  void HandleClose();
-  void HandleError();
+  char* Begin() { return &*buffer_.begin(); }
+  const char* Begin() const { return &*buffer_.begin(); }
+  void MakeSpace(size_t more);
 
  private:
-  string name_;
-  EventLoop* loop_;
-  // We don't expose those class to client.
-  std::unique_ptr<Socket> socket_;
-  std::unique_ptr<Channel> channel_;
-  InetAddress local_addr_;
-  InetAddress peer_addr_;
-  ConnectionCallback connection_cb_;
-  MessageCallback message_cb_;
-  ConnectionCallback close_cb_;
-  ChannelBuffer input_buffer_;
-  ChannelBuffer output_buffer_;
+  std::vector<char> buffer_;
+  size_t reader_index_;
+  size_t writer_index_;
 };
 
 }  // namespace event
 }  // namespace cutio
 
-#endif  // CUTIO_EVENT_NET_TCP_CONNECTION_H_
+#endif  // CUTIO_EVENT_NET_CHANNEL_BUFFER_H_

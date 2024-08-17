@@ -59,7 +59,42 @@ TcpConnection::TcpConnection(string name,
       channel_(new Channel(loop, sockfd)),
       local_addr_(local_addr),
       peer_addr_(peer_addr) {
+  // We don't use shared_from_this, because we hold strong reference of channel_.
+  channel_->SetReadCallback([this] { HandleRead(); });
+  channel_->SetWriteCallback([this] { HandleWrite(); });
+  channel_->SetCloseCallback([this] { HandleClose(); });
+  channel_->SetErrorCallback([this] { HandleError(); });
+}
+
+void TcpConnection::Connected() {
+  channel_->SetEvents(Channel::kReadEvent);
   loop_->UpdateChannel(channel_.get());
+
+  connection_cb_(shared_from_this());
+}
+
+void TcpConnection::HandleRead() {
+  int saved_errno;
+  auto n = input_buffer_.ReadFd(channel_->Fd(), &saved_errno);
+  if (n > 0) {
+    message_cb_(shared_from_this(), &input_buffer_);
+  } else if (n == 0) {
+    HandleClose();
+  } else {
+    // Check saved_errno
+  }
+}
+
+void TcpConnection::HandleWrite() {
+
+}
+
+void TcpConnection::HandleClose() {
+
+}
+
+void TcpConnection::HandleError() {
+
 }
 
 }  // namespace event

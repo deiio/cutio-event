@@ -46,13 +46,14 @@
 namespace cutio {
 namespace event {
 
+class ChannelBuffer;
 class TcpConnection;
 
 typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;
 typedef std::function<void()> TimerCallback;
 typedef std::function<void(const TcpConnectionPtr&)> ConnectionCallback;
 // The data has been read to (buf, len)
-typedef std::function<void(const TcpConnectionPtr&, const void* buf, ssize_t len)> MessageCallback;
+typedef std::function<void(const TcpConnectionPtr&, ChannelBuffer*)> MessageCallback;
 
 }  // namespace event
 }  // namespace cutio
