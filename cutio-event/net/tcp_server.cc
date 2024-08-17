@@ -44,6 +44,10 @@
 #include <functional>
 
 #include <cutio-event/net/acceptor.h>
+#include <cutio-event/net/event_loop.h>
+#include <cutio-event/net/inet_address.h>
+#include <cutio-event/net/sockets_ops.h>
+#include <cutio-event/net/tcp_connection.h>
 #include <cutio-event/net/thread_model.h>
 
 using namespace std::placeholders;
@@ -55,7 +59,8 @@ TcpServer::TcpServer(EventLoop* loop, const InetAddress& listen_addr)
   : loop_(loop),
     acceptor_(new Acceptor(loop, listen_addr)),
     thread_model_(new ThreadModel(loop)),
-    started_(false) {
+    started_(false),
+    next_conn_id_(1) {
   acceptor_->SetNewConnectionCallback(std::bind(&TcpServer::NewConnection, this, _1, _2));
 }
 
@@ -79,7 +84,23 @@ void TcpServer::Start() {
   }
 }
 
-void TcpServer::NewConnection(int fd, const InetAddress& peer_addr) {
+void TcpServer::NewConnection(int sockfd, const InetAddress& peer_addr) {
+  EventLoop* io_loop = thread_model_->GetNextLoop();
+  char buf[32];
+  snprintf(buf, sizeof(buf), "#%d", next_conn_id_);
+  ++next_conn_id_;
+  string conn_name = server_name_ + buf;
+
+  InetAddress local_addr(sockets::GetLocalAddr(sockfd));
+  TcpConnectionPtr conn(new TcpConnection(conn_name, loop_, sockfd, local_addr, peer_addr));
+  connections_[conn_name] = conn;
+  conn->SetConnectionCallback(connection_cb_);
+  conn->SetMessageCallback(message_cb_);
+  conn->SetCloseCallback(std::bind(&TcpServer::RemoveConnection, this, _1));
+  io_loop->RunInLoop([this, conn] { connection_cb_(conn); });
+}
+
+void TcpServer::RemoveConnection(const TcpConnectionPtr& conn) {
 
 }
 

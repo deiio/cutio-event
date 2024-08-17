@@ -53,4 +53,4 @@ typedef __gnu_cxx::__sso_string string;
 }  // namespace event
 }  // namespace cutio
 
-#endif  // CUTIO_EVENT_BASE_UTC_TIME_H_
+#endif  // CUTIO_EVENT_BASE_TYPES_H_

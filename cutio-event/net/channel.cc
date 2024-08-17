@@ -41,6 +41,8 @@
 
 #include <poll.h>
 
+#include <cutio-event/base/logger.h>
+
 namespace cutio {
 namespace event {
 
@@ -58,10 +60,11 @@ Channel::~Channel() {}
 
 void Channel::HandleEvent() {
   if ((revents_ & POLLHUP) && !(revents_ & POLLIN)) {
+    LOG_INFO << "Channel::HandleEvent() POLLHUP";
     if (close_callback_) close_callback_();
   }
   if (revents_ & POLLNVAL) {
-    perror("Channel::HandleEvent() POLLNVAL");
+    LOG_WARN << "Channel::HandleEvent() POLLNVAL";
   }
   if (revents_ & (POLLERR | POLLNVAL)) {
     if (error_callback_) error_callback_();

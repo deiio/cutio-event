@@ -67,13 +67,17 @@ void Acceptor::Listen() {
 void Acceptor::Accept() {
   InetAddress peer_addr(0);
   int conn_fd = accept_socket_.Accept(&peer_addr);
-  auto host_port = peer_addr.ToHostPort();
-  LOG_INFO << "connecting from " << host_port;
+  if (conn_fd >= 0) {
+    auto host_port = peer_addr.ToHostPort();
+    LOG_INFO << "connecting from " << host_port;
 
-  if (new_connection_cb_) {
-    new_connection_cb_(conn_fd, peer_addr);
+    if (new_connection_cb_) {
+      new_connection_cb_(conn_fd, peer_addr);
+    } else {
+      sockets::Close(conn_fd);
+    }
   } else {
-    sockets::Close(conn_fd);
+    LOG_ERROR << "accept error";
   }
 }
 

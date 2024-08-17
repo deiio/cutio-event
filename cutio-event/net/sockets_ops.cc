@@ -144,6 +144,16 @@ void ToHostPort(char* buf, size_t size, const sockaddr_in& addr) {
   snprintf(buf, size, "%s:%u", host, port);
 }
 
+sockaddr_in GetLocalAddr(int sockfd) {
+  sockaddr_in local_addr{};
+  socklen_t addr_len = sizeof(local_addr);
+  int ret = ::getsockname(sockfd, reinterpret_cast<SA*>(&local_addr), &addr_len);
+  if (ret < 0) {
+    LOG_SYSERR << "getsockname(" << sockfd << ") failed";
+  }
+  return local_addr;
+}
+
 }  // namespace sockets
 }  // namespace event
 }  // namespace cutio

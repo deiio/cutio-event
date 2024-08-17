@@ -39,9 +39,28 @@
 
 #include <cutio-event/net/tcp_connection.h>
 
+#include <cutio-event/net/channel.h>
+#include <cutio-event/net/event_loop.h>
+#include <cutio-event/net/socket.h>
+
+#include <utility>
+
 namespace cutio {
 namespace event {
 
+TcpConnection::TcpConnection(string name,
+                             EventLoop* loop,
+                             int sockfd,
+                             const InetAddress& local_addr,
+                             const InetAddress& peer_addr)
+    : name_(std::move(name)),
+      loop_(loop),
+      socket_(new Socket(sockfd)),
+      channel_(new Channel(loop, sockfd)),
+      local_addr_(local_addr),
+      peer_addr_(peer_addr) {
+  loop_->UpdateChannel(channel_.get());
+}
 
 }  // namespace event
 }  // namespace cutio

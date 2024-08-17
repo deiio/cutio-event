@@ -41,16 +41,18 @@
 #define CUTIO_EVENT_NET_CALLBACKS_H_
 
 #include <functional>
+#include <memory>
 
 namespace cutio {
 namespace event {
 
 class TcpConnection;
 
+typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;
 typedef std::function<void()> TimerCallback;
-typedef std::function<void(TcpConnection*)> ConnectionCallback;
+typedef std::function<void(const TcpConnectionPtr&)> ConnectionCallback;
 // The data has been read to (buf, len)
-typedef std::function<void(TcpConnection*, const void* buf, ssize_t len)> MessageCallback;
+typedef std::function<void(const TcpConnectionPtr&, const void* buf, ssize_t len)> MessageCallback;
 
 }  // namespace event
 }  // namespace cutio

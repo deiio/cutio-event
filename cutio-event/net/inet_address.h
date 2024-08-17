@@ -57,7 +57,7 @@ class InetAddress : public copyable {
  public:
   /**
    * Constructs an endpoint with given port number.
-   * Mostly used in TcpServer.
+   * Mostly used in TcpServer listening.
    */
   explicit InetAddress(uint16_t port);
 
@@ -65,14 +65,20 @@ class InetAddress : public copyable {
    * Constructs an endpoint with given host and port.
    * @c host could either be "1.2.3.4" or "furzoom.com"
    */
-   InetAddress(string host, uint16_t port);
+  InetAddress(string host, uint16_t port);
+
+  /**
+   * Constructs an endpoint with given struct @c addr.
+   * Mostly used when accepting new connections.
+   */
+  explicit InetAddress(const sockaddr_in& addr) : addr_(addr) {}
 
    // Default copy/assignment are Okay.
 
   string ToHostPort() const;
 
-  const struct sockaddr_in& GetSockAddrInet() const { return addr_; }
-  struct sockaddr_in* GetMutableSockAddrInet() { return &addr_; }
+  const sockaddr_in& GetSockAddrInet() const { return addr_; }
+  void SetSockAddrInet(const sockaddr_in& addr) { addr_ = addr; }
 
  private:
   sockaddr_in addr_{};

@@ -69,7 +69,7 @@ int Socket::Accept(InetAddress* peer_addr) {
   sockaddr_in addr{};
   int conn_fd = sockets::Accept(sockfd_, &addr);
   if (conn_fd >= 0) {
-    *peer_addr->GetMutableSockAddrInet() = addr;
+    peer_addr->SetSockAddrInet(addr);
   }
   return conn_fd;
 }

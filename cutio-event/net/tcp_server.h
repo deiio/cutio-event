@@ -40,10 +40,12 @@
 #ifndef CUTIO_EVENT_NET_TCP_SERVER_H_
 #define CUTIO_EVENT_NET_TCP_SERVER_H_
 
+#include <map>
 #include <memory>
 #include <utility>
 
 #include <cutio-event/base/noncopyable.h>
+#include <cutio-event/base/types.h>
 #include <cutio-event/net/callbacks.h>
 
 namespace cutio {
@@ -97,7 +99,10 @@ class TcpServer : noncopyable {
 
  private:
   // Not thread safe.
-  void NewConnection(int fd, const InetAddress& peer_addr);
+  void NewConnection(int sockfd, const InetAddress& peer_addr);
+  void RemoveConnection(const TcpConnectionPtr& conn);
+
+  typedef std::map<string, TcpConnectionPtr> ConnectionMap;
 
  private:
   // The acceptor loop.
@@ -106,7 +111,11 @@ class TcpServer : noncopyable {
   std::unique_ptr<ThreadModel> thread_model_;
   ConnectionCallback connection_cb_;
   MessageCallback message_cb_;
+  const string server_name_;
   bool started_;
+  // Always in loop thread.
+  int next_conn_id_;
+  ConnectionMap connections_;
 };
 
 }  // namespace event

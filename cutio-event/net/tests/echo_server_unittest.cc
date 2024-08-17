@@ -41,9 +41,11 @@
 
 #include <cutio-event/base/logger.h>
 #include <cutio-event/base/thread.h>
+#include <cutio-event/base/types.h>
 #include <cutio-event/net/event_loop.h>
 #include <cutio-event/net/acceptor.h>
 #include <cutio-event/net/inet_address.h>
+#include <cutio-event/net/tcp_connection.h>
 #include <cutio-event/net/tcp_server.h>
 
 using namespace cutio::event;
@@ -63,11 +65,15 @@ class EchoServer {
   }
 
  private:
-  void OnConnection(TcpConnection* conn) {
-
+  void OnConnection(const TcpConnectionPtr& conn) {
+    LOG_INFO << "conn " << conn->PeerAddr().ToHostPort() << " -> "
+             << conn->LocalAddr().ToHostPort();
   }
 
-  void OnMessage(TcpConnection*, const void* buf, ssize_t len) {}
+  void OnMessage(const TcpConnectionPtr& conn, const void* buf, ssize_t len) {
+    LOG_INFO << "receive message from " << conn->PeerAddr().ToHostPort()
+             << " (" << len << ")";
+  }
 
  private:
   EventLoop* loop_;

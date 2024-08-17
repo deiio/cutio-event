@@ -40,16 +40,53 @@
 #ifndef CUTIO_EVENT_NET_TCP_CONNECTION_H_
 #define CUTIO_EVENT_NET_TCP_CONNECTION_H_
 
+#include <memory>
+#include <utility>
+
 #include <cutio-event/base/noncopyable.h>
+#include <cutio-event/base/types.h>
+#include <cutio-event/net/callbacks.h>
+#include <cutio-event/net/inet_address.h>
 
 namespace cutio {
 namespace event {
 
-class TcpConnection : noncopyable {
+class Channel;
+class EventLoop;
+class Socket;
+
+/**
+ * TCP connection, for both client and server usage.
+ *
+ * This is an interface class, so don't expose too much details.
+ */
+class TcpConnection : public std::enable_shared_from_this<TcpConnection>,
+                      noncopyable {
  public:
+  /**
+   * Constructs a TcpConnection with a connected sockfd.
+   */
+  TcpConnection(string name, EventLoop* loop, int sockfd,
+                const InetAddress& local_addr, const InetAddress& peer_addr);
+
+  const InetAddress& LocalAddr() const { return local_addr_; }
+  const InetAddress& PeerAddr() const { return peer_addr_; }
+
+  void SetConnectionCallback(ConnectionCallback cb) { connection_cb_ = std::move(cb); }
+  void SetMessageCallback(MessageCallback cb) { message_cb_ = std::move(cb); }
+  void SetCloseCallback(ConnectionCallback cb) { close_cb_ = std::move(cb); }
 
  private:
-
+  string name_;
+  EventLoop* loop_;
+  // We don't expose those class to client.
+  std::unique_ptr<Socket> socket_;
+  std::unique_ptr<Channel> channel_;
+  InetAddress local_addr_;
+  InetAddress peer_addr_;
+  ConnectionCallback connection_cb_;
+  MessageCallback message_cb_;
+  ConnectionCallback close_cb_;
 };
 
 }  // namespace event
