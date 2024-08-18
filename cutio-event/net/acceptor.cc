@@ -66,6 +66,7 @@ void Acceptor::Listen() {
 }
 
 void Acceptor::Accept() {
+  loop_->AssertInLoopThread();
   InetAddress peer_addr(0);
   int conn_fd = accept_socket_.Accept(&peer_addr);
   if (conn_fd >= 0) {

@@ -43,6 +43,7 @@
 #include <cstdio>
 
 #include <cutio-event/base/logger.h>
+#include <cutio-event/base/types.h>
 #include <cutio-event/net/channel.h>
 
 namespace cutio {
@@ -71,7 +72,8 @@ void PollPoller::UpdateChannel(Channel* channel) {
     pfd.events = static_cast<short>(channel->Events());
     pfd.revents = 0;
     poll_fds_.push_back(pfd);
-    channel->SetIndex(static_cast<int>(poll_fds_.size() - 1));
+    auto idx = static_cast<int>(poll_fds_.size() - 1);
+    channel->SetIndex(idx);
     channels_[pfd.fd] = channel;
   } else {
     // Update existing one
@@ -80,12 +82,31 @@ void PollPoller::UpdateChannel(Channel* channel) {
     int idx = channel->Index();
     assert(0 <= idx && idx < static_cast<int>(poll_fds_.size()));
     auto& pfd = poll_fds_[static_cast<unsigned long>(idx)];
-    assert(pfd.fd == channel->Fd() || pfd.fd == -1);
+    assert(pfd.fd == channel->Fd() || pfd.fd == -channel->Fd() - 1);
     pfd.events = static_cast<short>(channel->Events());
     if (pfd.events == 0) {
       // Ignore this pollfd
-      pfd.fd = -1;
+      pfd.fd = -channel->Fd() - 1;
+      LOG_DEBUG << "set pfd.fd=-fd-1 for=" << channel->Fd();
     }
+  }
+}
+
+void PollPoller::RemoveChannel(Channel* channel) {
+  assert(channels_.find(channel->Fd()) != channels_.end());
+  assert(channels_[channel->Fd()] == channel);
+
+  int idx = channel->Index();
+  assert(idx >= 0 && idx < static_cast<int>(poll_fds_.size()));
+  size_t n = channels_.erase(channel->Fd());
+  assert(n == 1);
+  if (static_cast<size_t>(idx) == poll_fds_.size() - 1) {
+    poll_fds_.pop_back();
+  } else {
+    int channel_at_end = poll_fds_.back().fd;
+    std::iter_swap(poll_fds_.begin() + idx, poll_fds_.end() - 1);
+    channels_[channel_at_end]->SetIndex(idx);
+    poll_fds_.pop_back();
   }
 }
 

@@ -121,11 +121,11 @@ int Accept(int sockfd, struct sockaddr_in* addr) {
       case ENOTSOCK:
       case EOPNOTSUPP:
         // Unexpected errors.
-        LOG_SYSFATAL << "Accept()";
+        LOG_ERROR << "Accept() " << strerror(saved_errno);
         break;
       default:
         // Unknown errors.
-        LOG_SYSFATAL << "Accept() unexpected error ";
+        LOG_ERROR << "Accept() unexpected error " << strerror(saved_errno);
         break;
     }
   }
@@ -135,6 +135,10 @@ int Accept(int sockfd, struct sockaddr_in* addr) {
 
 void Close(int sockfd) {
   ::close(sockfd);
+}
+
+void Shutdown(int sockfd) {
+  ::shutdown(sockfd, SHUT_RDWR);
 }
 
 void ToHostPort(char* buf, size_t size, const sockaddr_in& addr) {

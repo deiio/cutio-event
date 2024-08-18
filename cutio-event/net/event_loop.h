@@ -69,34 +69,54 @@ class EventLoop : noncopyable {
   EventLoop();
   ~EventLoop();
 
-  // Loops forever.
-  //
-  // Must be called in the same thread as creation of the object.
+  /**
+   * Loops forever.
+   *
+   * Must be called in the same thread as creation of the object.
+   */
   void Loop();
 
   void Quit();
   void Wakeup();
 
-  // Timers.
-  // Runs callback immediately in the loop thread.
-  // It wakes up the loop, and run the cb.
-  // Safe to call from other threads.
+  /**
+   * Timers.
+   * Runs callback immediately in the loop thread.
+   * It wakes up the loop, and run the cb. If in the same loop thread,
+   * cb is run within the function.
+   * Safe to call from other threads.
+   */
   void RunInLoop(const Functor& cb);
 
-  // Runs callback at the specified time @c time.
-  // Safe to call from other threads.
+  /**
+   * Queues callback in the loop thread.
+   * Runs after finish pooling.
+   * Safe to call from other threads.
+   */
+  void RunDelayDestruct(const Functor& cb);
+
+  /**
+   * Runs callback at the specified time @c time.
+   * Safe to call from other threads.
+   */
   TimerId RunAt(const Timestamp& time, const TimerCallback& cb);
 
-  // Runs callback after @c delay seconds.
-  // Safe to call from other threads.
+  /**
+   * Runs callback after @c delay seconds.
+   * Safe to call from other threads.
+   */
   TimerId RunAfter(double delay, const TimerCallback& cb);
 
-  // Runs callback every @c interval seconds.
-  // Safe to call from other threads.
+  /**
+   * Runs callback every @c interval seconds.
+   * Safe to call from other threads.
+   */
   TimerId RunEvery(double interval, const TimerCallback& cb);
 
-  // Cancels the timer.
-  // Safe to cal from other threads.
+  /**
+   * Cancels the timer.
+   * Safe to cal from other threads.
+   */
   void Cancel(TimerId timer_id);
 
   void UpdateChannel(Channel* channel);

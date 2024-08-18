@@ -59,6 +59,7 @@ class PollPoller : public Poller {
 
   void Poll(int timeout_ms, ChannelList* active_channels) override;
   void UpdateChannel(Channel* channel) override;
+  void RemoveChannel(Channel* channel) override;
 
  private:
   void FillActiveChannels(int num_events, ChannelList* active_channels) const;

@@ -67,18 +67,26 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection>,
   /**
    * Constructs a TcpConnection with a connected sockfd.
    */
-  TcpConnection(string name, EventLoop* loop, int sockfd,
+  TcpConnection(EventLoop* loop, string name, int sockfd,
                 const InetAddress& local_addr, const InetAddress& peer_addr);
+  ~TcpConnection();
 
+  EventLoop* GetLoop() const { return loop_; }
+  const string& Name() const { return name_; }
   const InetAddress& LocalAddr() const { return local_addr_; }
   const InetAddress& PeerAddr() const { return peer_addr_; }
+  bool Connected() const { return state_ == kConnected; };
+  bool Connecting() const { return state_ == kConnecting; }
+
+  void Shutdown();
 
   void SetConnectionCallback(ConnectionCallback cb) { connection_cb_ = std::move(cb); }
   void SetMessageCallback(MessageCallback cb) { message_cb_ = std::move(cb); }
   void SetCloseCallback(ConnectionCallback cb) { close_cb_ = std::move(cb); }
 
   // Called when TcpServer accepts a new connection
-  void Connected();
+  void ConnectEstablished();
+  void ConnectDestroyed();
 
  private:
   void HandleRead();
@@ -87,8 +95,11 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection>,
   void HandleError();
 
  private:
-  string name_;
+  enum States { kDisconnected, kConnecting, kConnected };
+
   EventLoop* loop_;
+  string name_;
+  States state_;
   // We don't expose those class to client.
   std::unique_ptr<Socket> socket_;
   std::unique_ptr<Channel> channel_;

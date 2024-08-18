@@ -42,6 +42,7 @@
 #include <assert.h>
 
 #include <functional>
+#include <utility>
 
 #include <cutio-event/net/acceptor.h>
 #include <cutio-event/net/event_loop.h>
@@ -56,7 +57,11 @@ namespace cutio {
 namespace event {
 
 TcpServer::TcpServer(EventLoop* loop, const InetAddress& listen_addr)
+  : TcpServer(loop, listen_addr, listen_addr.ToHostPort()) {}
+
+TcpServer::TcpServer(EventLoop* loop, const InetAddress& listen_addr, string name)
   : loop_(loop),
+    name_(std::move(name)),
     acceptor_(new Acceptor(loop, listen_addr)),
     thread_model_(new ThreadModel(loop)),
     started_(false),
@@ -85,24 +90,32 @@ void TcpServer::Start() {
 }
 
 void TcpServer::NewConnection(int sockfd, const InetAddress& peer_addr) {
+  loop_->AssertInLoopThread();
   EventLoop* io_loop = thread_model_->GetNextLoop();
   char buf[32];
-  snprintf(buf, sizeof(buf), "#%d", next_conn_id_);
+  snprintf(buf, sizeof(buf), "%s#%d", name_.c_str(), next_conn_id_);
   ++next_conn_id_;
   string conn_name = server_name_ + buf;
 
   InetAddress local_addr(sockets::GetLocalAddr(sockfd));
-  TcpConnectionPtr conn(new TcpConnection(conn_name, loop_, sockfd, local_addr, peer_addr));
+  TcpConnectionPtr conn(new TcpConnection(loop_, conn_name, sockfd, local_addr, peer_addr));
   connections_[conn_name] = conn;
   conn->SetConnectionCallback(connection_cb_);
   conn->SetMessageCallback(message_cb_);
   conn->SetCloseCallback(std::bind(&TcpServer::RemoveConnection, this, _1));
-  conn->Connected();
-  io_loop->RunInLoop([this, conn] { connection_cb_(conn); });
+  io_loop->RunInLoop([conn] { conn->ConnectEstablished(); });
 }
 
 void TcpServer::RemoveConnection(const TcpConnectionPtr& conn) {
+  loop_->RunInLoop([this, conn] { RemoveConnectionInLoop(conn); });
+}
 
+void TcpServer::RemoveConnectionInLoop(const TcpConnectionPtr& conn) {
+  loop_->AssertInLoopThread();
+  size_t n = connections_.erase(conn->Name());
+  assert(n == 1);
+  auto* io_loop = conn->GetLoop();
+  io_loop->RunInLoop([conn] { conn->ConnectDestroyed(); });
 }
 
 }  // namespace event

@@ -41,6 +41,7 @@
 #define CUTIO_EVENT_NET_CHANNEL_H_
 
 #include <functional>
+#include <memory>
 
 #include <cutio-event/base/noncopyable.h>
 
@@ -73,6 +74,12 @@ class Channel : noncopyable {
   void SetCloseCallback(const EventCallback& cb) { close_callback_ = cb; }
   void SetErrorCallback(const EventCallback& cb) { error_callback_ = cb; }
 
+  /**
+   * Tie this channel to the owner object managed by shared_ptr,
+   * prevent the owner object being destroyed in HandleEvent.
+   */
+  void Tie(const std::shared_ptr<void>&);
+
   int Fd() const { return fd_; }
   int Events() const { return events_; }
 
@@ -85,11 +92,18 @@ class Channel : noncopyable {
   EventLoop* GetLoop() { return loop_; }
 
  private:
+  void HandleEventWithGuard();
+
+ private:
   EventLoop*    loop_;
   const int     fd_;
   int           events_;
   int           revents_;
   int           index_;   // Used by PollPoller
+
+  std::weak_ptr<void> tie_;
+  bool                tied_;
+
   EventCallback read_callback_;
   EventCallback write_callback_;
   EventCallback close_callback_;

@@ -130,6 +130,10 @@ void EventLoop::RunInLoop(const Functor& cb) {
   }
 }
 
+void EventLoop::RunDelayDestruct(const EventLoop::Functor& cb) {
+
+}
+
 TimerId EventLoop::RunAt(const Timestamp& time, const TimerCallback& cb) {
   return timer_queue_->Schedule(cb, time, 0.0);
 }
@@ -156,6 +160,7 @@ void EventLoop::UpdateChannel(Channel* channel) {
 
 void EventLoop::RemoveChannel(Channel* channel) {
   assert(channel->GetLoop() == this);
+  poller_->RemoveChannel(channel);
 }
 
 void EventLoop::AssertInLoopThread() const {

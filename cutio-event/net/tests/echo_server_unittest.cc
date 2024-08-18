@@ -59,6 +59,7 @@ class EchoServer {
       server_(loop, listen_addr) {
     server_.SetConnectionCallback(std::bind(&EchoServer::OnConnection, this, _1));
     server_.SetReadCallback(std::bind(&EchoServer::OnMessage, this, _1, _2));
+    server_.SetThreadNum(0);
   }
 
   void Start() {
@@ -68,16 +69,24 @@ class EchoServer {
  private:
   void OnConnection(const TcpConnectionPtr& conn) {
     LOG_INFO << "conn " << conn->PeerAddr().ToHostPort() << " -> "
-             << conn->LocalAddr().ToHostPort();
+             << conn->LocalAddr().ToHostPort() << " " << (conn->Connected() ? "UP" : "DOWN");
+    if (!first) {
+      first = conn;
+    }
+    if (first == conn && !conn->Connected()) {
+      first.reset();
+      loop_->Quit();
+    }
   }
 
   void OnMessage(const TcpConnectionPtr& conn, ChannelBuffer* buf) {
-    auto len = buf->ReadableBytes();
-    LOG_INFO << "receive message from " << conn->PeerAddr().ToHostPort()
-             << " (" << len << "): " << buf->RetrieveAsString();
+    auto msg = buf->RetrieveAsString();
+    LOG_INFO << "recv " << msg.size() << " bytes '" << msg << "'";
   }
 
  private:
+  TcpConnectionPtr first;
+
   EventLoop* loop_;
   TcpServer server_;
 };

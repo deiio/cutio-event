@@ -72,6 +72,11 @@ class Poller : noncopyable {
    */
   virtual void UpdateChannel(Channel* channel) = 0;
 
+  /**
+   *
+   */
+  virtual void RemoveChannel(Channel* channel) = 0;
+
   static Poller* NewDefaultPoller();
 };
 

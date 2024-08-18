@@ -64,7 +64,10 @@ class ThreadModel;
 class TcpServer : noncopyable {
  public:
   TcpServer(EventLoop* loop, const InetAddress& listen_addr);
+  TcpServer(EventLoop* loop, const InetAddress& listen_addr, string name);
   ~TcpServer();
+
+  const string& Name() const { return name_; }
 
   /**
    * Set the number of threads for handling input.
@@ -100,13 +103,17 @@ class TcpServer : noncopyable {
  private:
   // Not thread safe.
   void NewConnection(int sockfd, const InetAddress& peer_addr);
+  // Thread safe.
   void RemoveConnection(const TcpConnectionPtr& conn);
+  // Not thread safe.
+  void RemoveConnectionInLoop(const TcpConnectionPtr& conn);
 
   typedef std::map<string, TcpConnectionPtr> ConnectionMap;
 
  private:
   // The acceptor loop.
   EventLoop* loop_;
+  string name_;
   std::unique_ptr<Acceptor> acceptor_;
   std::unique_ptr<ThreadModel> thread_model_;
   ConnectionCallback connection_cb_;

@@ -71,6 +71,7 @@ void BindOrDie(int sockfd, const struct sockaddr_in& addr);
 void ListenOrDie(int sockfd);
 int  Accept(int sockfd, struct sockaddr_in* addr);
 void Close(int sockfd);
+void Shutdown(int sockfd);
 
 void ToHostPort(char* buf, size_t size, const struct sockaddr_in& addr);
 sockaddr_in GetLocalAddr(int sockfd);
